@@ -60,11 +60,11 @@ plot_epicurve <- function(df, region = "Global", transparent = T){
     ggplot2::labs(title    = gtitle,
                   subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ",
                                     format(max(df$date, na.rm = T), "%B %d, %Y"))) +
-    ggplot2::theme(plot.title      = ggplot2::element_text(size  = 18, face = "bold"),
-                   axis.text       = ggplot2::element_text(size  = 10),
-                   axis.title      = ggplot2::element_text(size  = 12),
-                   legend.title    = ggplot2::element_text(size  = 12, face = "bold"),
-                   legend.text     = ggplot2::element_text(size  = 9),
+    ggplot2::theme(plot.title      = ggplot2::element_text(size  = 18, face = "bold", family = "Calibri"),
+                   axis.text       = ggplot2::element_text(size  = 10, family = "Calibri"),
+                   axis.title      = ggplot2::element_text(size  = 12, family = "Calibri"),
+                   legend.title    = ggplot2::element_text(size  = 12, face = "bold", family = "Calibri"),
+                   legend.text     = ggplot2::element_text(size  = 9), family = "Calibri",
                    legend.position = legend) +
     ggplot2::guides(fill = ggplot2::guide_legend(overide.aex  = list(size = 9)))
 
@@ -116,11 +116,11 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::scale_y_continuous(labels = comma) +
       ggplot2::labs(title    = if(type == "cases") {paste0("COVID-19 Cases: ", unique(df$country))} else {paste0("COVID-19 Deaths:", unique(df$country))},
                     subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ", format(max(df$date, na.rm = T), "%B %d, %Y"))) +
-      ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold"),
-                     axis.text    = ggplot2::element_text(size = 10),
-                     axis.title   = ggplot2::element_text(size = 12),
-                     legend.title = ggplot2::element_text(size = 12, face = "bold"),
-                     legend.text  = ggplot2::element_text(size = 9))
+      ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold", family = "Calibri"),
+                     axis.text    = ggplot2::element_text(size = 10, family = "Calibri"),
+                     axis.title   = ggplot2::element_text(size = 12, family = "Calibri"),
+                     legend.title = ggplot2::element_text(size = 12, face = "bold", family = "Calibri"),
+                     legend.text  = ggplot2::element_text(size = 9, family = "Calibri"))
   } else {
     df %>%
       ggplot2::ggplot(aes(x = date, y = if(type == "cases") {cases} else {deaths})) +
@@ -133,11 +133,11 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::scale_y_continuous(labels = comma) +
       ggplot2::labs(title    = if(type == "cases") {paste0("COVID-19 Cases per 100,000 People: ", unique(df$country))} else {paste0("COVID-19 Deaths per 100,000 People: ", unique(df$country))},
                     subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ", format(max(df$date, na.rm = T), "%B %d, %Y"))) +
-      ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold"),
-                     axis.text    = ggplot2::element_text(size = 8),
-                     axis.title   = ggplot2::element_text(size = 10),
-                     legend.title = ggplot2::element_text(size = 12, face = "bold"),
-                     legend.text  = ggplot2::element_text(size = 9))
+      ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold", family = "Calibri"),
+                     axis.text    = ggplot2::element_text(size = 8, family = "Calibri"),
+                     axis.title   = ggplot2::element_text(size = 10, family = "Calibri"),
+                     legend.title = ggplot2::element_text(size = 12, face = "bold", family = "Calibri"),
+                     legend.text  = ggplot2::element_text(size = 9, family = "Calibri"))
   }
 }
 
@@ -178,13 +178,13 @@ plot_epicurve_epidouble <- function(df){
     ggplot2::xlab("Date of Reporting") +
     ggplot2::labs(title    = paste0("COVID-19: ", unique(df$country)),
                   subtitle = paste0("Week of:", format(min(df$weekdate, na.rm = T), "%B %d, %Y"), " - ", format(max(df$weekdate, na.rm = T), "%B %d, %Y"))) +
-    ggplot2::theme(plot.title      = ggplot2::element_text(size = 16, face = "bold"),
-                   axis.text       = ggplot2::element_text(size = 14),
-                   axis.title      = ggplot2::element_text(size = 14),
+    ggplot2::theme(plot.title      = ggplot2::element_text(size = 16, face = "bold", family = "Calibri"),
+                   axis.text       = ggplot2::element_text(size = 14, family = "Calibri"),
+                   axis.title      = ggplot2::element_text(size = 14, family = "Calibri"),
                    legend.position = "top",
                    legend.key      = element_blank(),
                    legend.title    = ggplot2::element_blank(),
-                   legend.text     = ggplot2::element_text(size = 12))  +
+                   legend.text     = ggplot2::element_text(size = 12, family = "Calibri"))  +
     ggplot2::guides(color          = ggplot2::guide_legend(override.aes = list(fill = c("lightblue", NA))))
 }
 
@@ -223,13 +223,13 @@ plot_epicurve_dailydouble <- function(df){
     ggplot2::xlab("Date of Reporting") +
     ggplot2::labs(title    = paste0("COVID-19: ", unique(df$country)),
                   subtitle = paste0("Week of:", format(min(df$weekdate, na.rm = T), "%B %d, %Y"), " - ", format(max(df$weekdate, na.rm = T), "%B %d, %Y"))) +
-    ggplot2::theme(plot.title      = ggplot2::element_text(size = 16, face = "bold"),
-                   axis.text       = ggplot2::element_text(size = 14),
-                   axis.title      = ggplot2::element_text(size = 14),
+    ggplot2::theme(plot.title      = ggplot2::element_text(size = 16, face = "bold", family = "Calibri"),
+                   axis.text       = ggplot2::element_text(size = 14, family = "Calibri"),
+                   axis.title      = ggplot2::element_text(size = 14, family = "Calibri"),
                    legend.position = "top",
                    legend.key      = element_blank(),
                    legend.title    = ggplot2::element_blank(),
-                   legend.text     = ggplot2::element_text(size = 12))  +
+                   legend.text     = ggplot2::element_text(size = 12, family = "Calibri"))  +
     ggplot2::guides(color          = ggplot2::guide_legend(override.aes = list(fill = c("lightblue", NA))))
 }
 
@@ -274,14 +274,14 @@ plot_riskmatrix <- function(df){
     ggplot2::annotate(geom = "text", x = -122, y = 10.7, label = "10.0 - 24.9 per 100k", color = "orange2",   size = 3)+
     ggplot2::annotate(geom = "text", x = -133, y = 25.7, label = "25.0+ per 100k",       color = "red3",      size = 3)+
     ggplot2::theme_classic() +
-    ggplot2::theme(axis.text     = element_text(size = 8),
-                   axis.title    = element_text(size = 10),
-                   legend.text   = element_text(size = 7),
-                   legend.title  = element_text(size = 9),
-                   plot.title    = element_text(size = 16, face = "bold"),
-                   plot.subtitle = element_text(size = 11),
+    ggplot2::theme(axis.text     = element_text(size = 8, family = "Calibri"),
+                   axis.title    = element_text(size = 10, family = "Calibri"),
+                   legend.text   = element_text(size = 7, family = "Calibri"),
+                   legend.title  = element_text(size = 9, family = "Calibri"),
+                   plot.title    = element_text(size = 16, face = "bold", family = "Calibri"),
+                   plot.subtitle = element_text(size = 11, family = "Calibri"),
                    plot.margin   = unit(c(1,1.6,1.3,1),"cm"),
-                   plot.caption  = element_text(hjust = 0, size = 11)) +
+                   plot.caption  = element_text(hjust = 0, size = 11, family = "Calibri")) +
     ggplot2::labs(title    = "Burden and Recent Trends",
                   subtitle = paste0("Average daily incidence per 100,000 population and 7-day percent change, by new cases in past 7 days\n",
                                     format(max(df$date)-13, "%B %d, %Y"), ' - ', format(max(df$date)-7, "%B %d, %Y"), ' to ',
@@ -344,8 +344,8 @@ plot_vaxcoverage <- function(df){
       -Countries are labeled such that within each WHO Region, labeled countries are those that are the top 3 ranking countries
       for people vaccinated per 100 and the top 3 ranking countries for total vaccine doses administered
       -Vaccine data are incomplete and data may be out of date",
-                  legend.title  = element_text(size = 10, face = "bold")) +
-    ggplot2::theme(plot.title   = element_text(size = 14, face = "bold"),
-                   axis.title   = element_text(size = 12),
-                   plot.caption = element_text(hjust = 0, size = 12))
+                  legend.title  = element_text(size = 10, face = "bold", family = "Calibri")) +
+    ggplot2::theme(plot.title   = element_text(size = 14, face = "bold", family = "Calibri"),
+                   axis.title   = element_text(size = 12, family = "Calibri"),
+                   plot.caption = element_text(hjust = 0, size = 12, family = "Calibri"))
 }
