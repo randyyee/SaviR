@@ -45,10 +45,10 @@ The "plot_epicurve" function should take in the df with only WHO observations in
 
 ```{r}
 # Global
-plot_epicurve(filter(df, !is.na(who_region) & source == "WHO"), transparent = F) %>%
+plot_epicurve(filter(df, !is.na(who_region) & source == "WHO"), transparent = T) %>%
   ggsave(filename = "epi_curve_transparent_who.png", width = 13, height = 7, units = "in", bg = "transparent")
 
-plot_epicurve(filter(df, !is.na(who_region)  & source == "WHO"))%>%
+plot_epicurve(filter(df, !is.na(who_region)  & source == "WHO"), transparent = F)%>%
   ggsave(filename = "epi_curve_who.png", width = 13, height = 7, units = "in")
 
 #Regions
