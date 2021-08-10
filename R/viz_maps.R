@@ -174,9 +174,9 @@ map_trend <- function(df){
 #'
 #' @export
 
-map_vaccinations <- function(df, type = c("People", "Fully")){
+map_vaccinations <- function(df, vac_type = c("People", "Fully")){
 
-  if(type == "People"){
+  if(vac_type == "People"){
     map_template(df,
                  c("<1", "1- <3", "3- <10", "10- <30", "30+"),
                  c("#d4ece8","#a2d9d2", "#1f9fa9", "#005e70", "#27343a")) +
