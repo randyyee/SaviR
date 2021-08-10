@@ -176,6 +176,24 @@ map_trend <- function(df){
 
 map_vaccinations <- function(df, vac_type = c("People", "Fully")){
 
+  if(length(unique(df$who_region)) == 1){
+    if (df$who_region == "EURO"){
+      bbox <- sf::st_bbox(c(xmin = -2500000, ymin = 2000000, xmax = 7000000, ymax = 8500000))
+    } else if (df$who_region == "AMRO") {
+      bbox <- sf::st_bbox(c(xmin=-10775454, ymin=-5900074, xmax=-3072374, ymax=5318372))
+    } else if (df$who_region == "SEARO") {
+      bbox <- sf::st_bbox(c(xmin=6284395, ymin=-1808021, xmax=13315540, ymax=3796098))
+    } else if (df$who_region == "EMRO"){
+      bbox <- sf::st_bbox(c(xmin=-2500688.1, ymin=-850026.8, xmax=6918436.7, ymax=6245846.3))
+    } else if (df$who_region == "AFRO"){
+      bbox <- sf::st_bbox(c(xmin=-1800000, ymin=-3900074, xmax=4700000, ymax=4018372))
+    } else {
+      bbox <- sf::st_bbox(sf::st_as_sf(df))
+    }
+  } else {
+    bbox <- sf::st_bbox(sf::st_as_sf(df))
+  }
+
   if(vac_type == "People"){
     map_template(df,
                  c("<1", "1- <3", "3- <10", "10- <30", "30+"),
@@ -185,7 +203,9 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
            caption  = "Note:
        -Countries in white do not have data reported for total people vaccinated
        -Vaccine data are incomplete and data may be out of date") +
-      guides(fill=guide_legend(title = "People \nVaccinated \nper 100 \nPeople"))
+      guides(fill=guide_legend(title = "People \nVaccinated \nper 100 \nPeople")) +
+      ggplot2::coord_sf(xlim = bbox[c(1, 3)],
+                        ylim = bbox[c(2, 4)])
   } else {
     map_template(df, c("<1", "1- <3", "3- <10", "10- <30", "30+"), c("#CCECE6","#99D8C9", "#66C2A4", "#2CA25F", "#006D2C")) +
       labs(title    = paste0("People Fully Vaccinated per 100 People, ", format(max(df$date), "%B %d, %Y")),
@@ -193,7 +213,9 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
            caption  = "Note:
        -Countries in white do not have data reported for fully vaccinated
        -Vaccine data are incomplete and data may be out of date") +
-      guides(fill=guide_legend(title = "People \nFully \nVaccinated \nper 100 \nPeople"))
+      guides(fill=guide_legend(title = "People \nFully \nVaccinated \nper 100 \nPeople")) +
+      ggplot2::coord_sf(xlim = bbox[c(1, 3)],
+                        ylim = bbox[c(2, 4)])
   }
 
 }
