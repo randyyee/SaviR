@@ -64,7 +64,7 @@ plot_epicurve <- function(df, region = "Global", transparent = T){
                    axis.text       = ggplot2::element_text(size  = 10, family = "Calibri"),
                    axis.title      = ggplot2::element_text(size  = 12, family = "Calibri"),
                    legend.title    = ggplot2::element_text(size  = 12, face = "bold", family = "Calibri"),
-                   legend.text     = ggplot2::element_text(size  = 9), family = "Calibri",
+                   legend.text     = ggplot2::element_text(size  = 9,  family = "Calibri"),
                    legend.position = legend) +
     ggplot2::guides(fill = ggplot2::guide_legend(overide.aex  = list(size = 9)))
 
@@ -134,10 +134,10 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::labs(title    = if(type == "cases") {paste0("COVID-19 Cases per 100,000 People: ", unique(df$country))} else {paste0("COVID-19 Deaths per 100,000 People: ", unique(df$country))},
                     subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ", format(max(df$date, na.rm = T), "%B %d, %Y"))) +
       ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold", family = "Calibri"),
-                     axis.text    = ggplot2::element_text(size = 8, family = "Calibri"),
+                     axis.text    = ggplot2::element_text(size = 8,  family = "Calibri"),
                      axis.title   = ggplot2::element_text(size = 10, family = "Calibri"),
                      legend.title = ggplot2::element_text(size = 12, face = "bold", family = "Calibri"),
-                     legend.text  = ggplot2::element_text(size = 9, family = "Calibri"))
+                     legend.text  = ggplot2::element_text(size = 9,  family = "Calibri"))
   }
 }
 
