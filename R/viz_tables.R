@@ -44,7 +44,7 @@ table_countriesofconcern <- function(df_risk, df_vaccinations, df_vaccinations_m
             dplyr::filter(last_observation_date == max(last_observation_date)) %>%
             dplyr::mutate(`Vaccines in Use` = vaccines,
                           `% Delta` = "") %>%
-            dplyr::select(location, `Vaccines in Use`, `% Delta`, `Variant Comments`), by = c("Country" = "location")
+            dplyr::select(location, `Vaccines in Use`, `% Delta`), by = c("Country" = "location")
         )
     ))  %>%
     tibble::rownames_to_column(" ") %>%
