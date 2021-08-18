@@ -135,7 +135,7 @@ table_10incidence <- function(df, type = "Global", run_date = "Enter a date"){
                    sep_mark = ",",
                    decimals = 1)  %>%
     gt::cols_label(country = gt::html("Country/ Area"),
-                   value1  = gt::html("New Cases<br>This Week"),
+                   value1  = gt::html("Incidence<br>Per 100,000"),
                    value2  = gt::html("% Change<br>Last Week")) %>%
     gt::cols_align("center") %>%
     gt::cols_width(c(country) ~ gt::px(175),
@@ -148,10 +148,12 @@ table_10incidence <- function(df, type = "Global", run_date = "Enter a date"){
                     source_notes.font.size    = gt::pct(70),
                     source_notes.padding      = 0,
                     footnotes.padding         = 0) %>%
-    gt::tab_source_note(source_note = gt::md("Data Source: WHO Coronavirus Disease (COVID-19) Dashboard")) %>%
+    gt::tab_source_note(source_note = gt::md("Data Source: WHO Coronavirus Disease (COVID-19) Dashboard ")) %>%
     gt::tab_source_note(source_note = paste0("Data as of ", run_date)) %>%
-    gt::tab_footnote(footnote       = "Percent change in cases of most recent 7 days to 7 days prior",
-                     locations      = cells_column_labels(columns = c(value2)))
+    gt::tab_footnote(footnote = "Percent change in cases of most recent 7 days to 7 days prior",
+                     locations = cells_column_labels(columns = vars(value2))) %>%
+    gt::tab_footnote(footnote = "Average daily incidence per 100,000 in past 7 days",
+                     locations = cells_column_labels(columns = vars(value1)))
 
 }
 
