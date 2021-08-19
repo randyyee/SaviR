@@ -18,15 +18,15 @@ library(SaviR)
 library(tidyverse)
 library(gt)
 
-sunday_date <-  lubridate::floor_date(Sys.Date(), "week", week_start = 7)-7
+sunday_date <-  lubridate::floor_date(Sys.Date(), "week", week_start = 7)
 ```
 
-## Data
+## Data: The Frankenstein Dataset
 
-onetable - stored metadata
-get_covid_df()
-calc_add_risk()
-get_vax()
+onetable - stored metadata with iso2 and iso3 codes, country names, WHO/State/WorldBank regions, and UN population estimates
+get_covid_df() - COVID dataframe from WHO and appended with select JHU obs
+calc_add_risk() - Add risk matrix calculations to dataframe
+get_vax() - Get vaccination data from OWID
 
 This snippet produces the master dataframe with all the variables required for all of the sitrep graphics.
 
@@ -42,6 +42,8 @@ df <- onetable %>%
 plot_epicurve(df, transparent = T)
 
 The "plot_epicurve" function should take in the df with only WHO observations in order to match the same curve on the who.int dashboard. The individual epicurves for each region can be run simply by filtering for one region in the dataframe. The function will detect that the region column has only one region and will produce the epicurve accordingly.
+
+Data prep: In this snippet, I first filter out any N/A WHO regions so the final plot won't have an extra unknown region, and I also filter just for WHO data (again in order to match who.int).
 
 ```{r}
 # Global

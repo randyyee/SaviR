@@ -27,7 +27,7 @@ devtools::install_github("randyyee/SaviR")
 | get_country_coords | get_testing        |                       |                      |
 |                    | get_vaccinations   |                       |                      |
 
-* Metadata is stored in this package.
+* Metadata is stored in this package and can be called:
 
 ```{r eval=FALSE}
 metadata <- onetable  

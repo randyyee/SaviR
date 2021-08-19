@@ -151,9 +151,9 @@ table_10incidence <- function(df, type = "Global", run_date = "Enter a date"){
     gt::tab_source_note(source_note = gt::md("Data Source: WHO Coronavirus Disease (COVID-19) Dashboard ")) %>%
     gt::tab_source_note(source_note = paste0("Data as of ", run_date)) %>%
     gt::tab_footnote(footnote = "Percent change in cases of most recent 7 days to 7 days prior",
-                     locations = cells_column_labels(columns = vars(value2))) %>%
+                     locations = cells_column_labels(columns = c(value2))) %>%
     gt::tab_footnote(footnote = "Average daily incidence per 100,000 in past 7 days",
-                     locations = cells_column_labels(columns = vars(value1)))
+                     locations = cells_column_labels(columns = c(value1)))
 
 }
 
