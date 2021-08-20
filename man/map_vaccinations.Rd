@@ -4,7 +4,7 @@
 \alias{map_vaccinations}
 \title{map_vaccinations}
 \usage{
-map_vaccinations(df, type = c("People", "Fully"))
+map_vaccinations(df, vac_type = c("People", "Fully"))
 }
 \arguments{
 \item{df}{A dataframe with the following: region, country, date, percent_change AS 6-level factors (<1 1- <3, 3- <10, 10 -<30, 30+).}

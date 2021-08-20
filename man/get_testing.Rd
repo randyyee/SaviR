@@ -8,7 +8,6 @@ get_testing()
 }
 \description{
 Get testing data from OWID and FIND.
-It will output a cross-sectional dataset and a longitudinal dataset.
 }
 \examples{
 \dontrun{
