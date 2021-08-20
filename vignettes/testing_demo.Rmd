@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+author: "Randy"
+date: "8/19/2021"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(SaviR)
+library(tidyverse)
+```
+
+```{r}
+df_OWID <- read.csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/testing/covid-testing-all-observations.csv")
+```
+
+```{r}
+df_FIND <- read.csv("https://raw.githubusercontent.com/dsbbfinddx/FINDCov19TrackerData/master/processed/data_all.csv") %>%
+  filter(set == "country") %>%
+  select(country = name, unit, date = time, new_tests_orig, cum_tests_orig, new_cases_orig, new_deaths_orig)
+```
+
+
+```{r}
+df <- onetable %>%
+  left_join(df_OWID, by = c("id" = "ISO.code")) %>%
+  left_join(df_FIND, by = c("id" = "unit", "Date" = "date"))
+```
+
