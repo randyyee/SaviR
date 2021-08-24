@@ -199,7 +199,7 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
                  c("<1", "1- <3", "3- <10", "10- <30", "30+"),
                  c("#d4ece8","#a2d9d2", "#1f9fa9", "#005e70", "#27343a")) +
       labs(title    = paste0("People Vaccinated per 100 People, ", format(max(df$date), "%B %d, %Y")),
-           subtitle = "Number of people out of 100 who received at least one vaccine dose; does not represent percent of \npopulation fully vaccinated",
+           subtitle = "Number of people out of 100 who received at least one vaccine dose; \ndoes not represent percent of population fully vaccinated",
            caption  = "Note:
        -Countries in white do not have data reported for total people vaccinated
        -Vaccine data are incomplete and data may be out of date") +
