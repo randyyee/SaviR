@@ -60,7 +60,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                                na.translate = F) +
     ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
                    plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri"),
-                   plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri"),
+                   plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
                    plot.caption.position = "plot",
                    legend.position       = c(0.02, 0.00),
                    legend.justification  = c("left", "bottom"),
