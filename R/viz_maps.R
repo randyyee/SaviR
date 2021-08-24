@@ -33,7 +33,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                                  na.translate = F) +
       ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
                      plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri"),
-                     plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri"),
+                     plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
                      plot.caption.position = "plot",
                      legend.position       = c(0.02, 0.00),
                      legend.justification  = c("left", "bottom"),
@@ -198,8 +198,8 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
     map_template(df,
                  c("<1", "1- <3", "3- <10", "10- <30", "30+"),
                  c("#d4ece8","#a2d9d2", "#1f9fa9", "#005e70", "#27343a")) +
-      labs(title    = paste0("People Vaccinated per 100 People, ", format(max(df$date), "%B %d, %Y")),
-           subtitle = "Number of people out of 100 who received at least one vaccine dose; \ndoes not represent percent of population fully vaccinated",
+      labs(title    = "People Vaccinated per 100 People",
+           subtitle = paste0("Data as of ",format(max(df$date), "%B %d, %Y"),"\nNumber of people out of 100 who received at least one vaccine dose; \ndoes not represent percent of population fully vaccinated"),
            caption  = "Note:
        -Countries in white do not have data reported for total people vaccinated
        -Vaccine data are incomplete and data may be out of date") +
@@ -208,8 +208,8 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
                         ylim = bbox[c(2, 4)])
   } else {
     map_template(df, c("<1", "1- <3", "3- <10", "10- <30", "30+"), c("#CCECE6","#99D8C9", "#66C2A4", "#2CA25F", "#006D2C")) +
-      labs(title    = paste0("People Fully Vaccinated per 100 People, ", format(max(df$date), "%B %d, %Y")),
-           subtitle = "Represents percent of population fully vaccinated",
+      labs(title    = "People Fully Vaccinated per 100 People",
+           subtitle = paste0("Data as of ", format(max(df$date), "%B %d, %Y"),"\nRepresents percent of population fully vaccinated"),
            caption  = "Note:
        -Countries in white do not have data reported for fully vaccinated
        -Vaccine data are incomplete and data may be out of date") +
