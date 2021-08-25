@@ -20,11 +20,6 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
     ggplot2::ggplot(df) + # Param
       ggplot2::geom_sf(data = country_coords, # Param
                        aes(geometry = geometry),
-<<<<<<< HEAD
-                       #fill = "gray99",
-=======
-                       fill = "gray99",
->>>>>>> c0c5b9f2ba527b04ae176f52816163c2749b46ee
                        size = 0.3) +
       ggplot2::geom_sf(data = df,
                        aes(geometry = geometry,
@@ -50,11 +45,6 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
   ggplot2::ggplot(df) + # Param
     ggplot2::geom_sf(data = country_coords, # Param
                      aes(geometry = geometry),
-<<<<<<< HEAD
-                     #fill = "gray99",
-=======
-                     fill = "gray99",
->>>>>>> c0c5b9f2ba527b04ae176f52816163c2749b46ee
                      size = 0.3) +
     ggplot2::geom_sf(data = df,
                      aes(geometry = geometry,
