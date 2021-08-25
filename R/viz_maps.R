@@ -20,7 +20,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
     ggplot2::ggplot(df) + # Param
       ggplot2::geom_sf(data = country_coords, # Param
                        aes(geometry = geometry),
-                       fill = "grey99",
+                       fill = "grey",
                        size = 0.3) +
       ggplot2::geom_sf(data = df,
                        aes(geometry = geometry,
@@ -28,7 +28,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                        size = 0.2) +
       ggplot2::theme_void() +
       ggplot2::scale_fill_manual(values       = category_color_values, # Param
-                                 na.value     = "grey99",
+                                 na.value     = "white",
                                  drop         = F,
                                  na.translate = F) +
       ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
@@ -46,7 +46,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
   ggplot2::ggplot(df) + # Param
     ggplot2::geom_sf(data = country_coords, # Param
                      aes(geometry = geometry),
-                     fill = "grey99",
+                     fill = "grey",
                      size = 0.3) +
     ggplot2::geom_sf(data = df,
                      aes(geometry = geometry,
@@ -54,7 +54,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                      size = 0.2) +
     ggplot2::theme_void() +
     ggplot2::scale_fill_manual(values       = category_color_values, # Param
-                               na.value     = "grey99",
+                               na.value     = "white",
                                drop         = F,
                                labels       = category_color_labels, # Param
                                na.translate = F) +
