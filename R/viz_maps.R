@@ -30,7 +30,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
       ggplot2::scale_fill_manual(values       = category_color_values, # Param
                                  na.value     = "white",
                                  drop         = F,
-                                 na.translate = F) +
+                                 na.translate = T) +
       ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
                      plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri"),
                      plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
@@ -57,7 +57,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                                na.value     = "white",
                                drop         = F,
                                labels       = category_color_labels, # Param
-                               na.translate = F) +
+                               na.translate = T) +
     ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
                    plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri"),
                    plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
