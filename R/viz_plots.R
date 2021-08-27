@@ -111,9 +111,14 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::theme_classic() +
       ggplot2::ylab(if(type == "cases") {"Daily Cases"} else {"Daily Deaths"}) +
       ggplot2::xlab("Date of Reporting") +
-      ggplot2::scale_x_date(breaks       = c(by = "3 weeks"),
+      ggplot2::scale_x_date(limits = c(lubridate::floor_date(min(df$date, na.rm = T)-7, "week", week_start = 1),
+                                       lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
+                            breaks = seq.Date(from = as.Date(floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
+                                              to   = as.Date(floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
+                                              by   = "3 weeks"),
                             date_labels  = "%d\n%b") +
-      ggplot2::scale_y_continuous(labels = comma) +
+      ggplot2::scale_y_continuous(labels = comma,
+                                  expand = expansion(mult = c(0.01, .1))) +
       ggplot2::labs(title    = if(type == "cases") {paste0("COVID-19 Cases: ", unique(df$country))} else {paste0("COVID-19 Deaths:", unique(df$country))},
                     subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ", format(max(df$date, na.rm = T), "%B %d, %Y"))) +
       ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold", family = "Calibri"),
@@ -128,9 +133,14 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::theme_classic() +
       ggplot2::ylab(if(type == "cases") {"Daily Cases per 100,000 People"} else {"Daily Deaths per 100,000 People"}) +
       ggplot2::xlab("Date of Reporting") +
-      ggplot2::scale_x_date(breaks       = c(by = "3 weeks"),
+      ggplot2::scale_x_date(limits = c(lubridate::floor_date(min(df$date, na.rm = T)-7, "week", week_start = 1),
+                                       lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
+                            breaks = seq.Date(from = as.Date(floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
+                                              to   = as.Date(floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
+                                              by   = "3 weeks"),
                             date_labels  = "%d\n%b") +
-      ggplot2::scale_y_continuous(labels = comma) +
+      ggplot2::scale_y_continuous(labels = comma,
+                                  expand = expansion(mult = c(0.01, .1))) +
       ggplot2::labs(title    = if(type == "cases") {paste0("COVID-19 Cases per 100,000 People: ", unique(df$country))} else {paste0("COVID-19 Deaths per 100,000 People: ", unique(df$country))},
                     subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ", format(max(df$date, na.rm = T), "%B %d, %Y"))) +
       ggplot2::theme(plot.title   = ggplot2::element_text(size = 14, face = "bold", family = "Calibri"),
