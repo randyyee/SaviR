@@ -113,8 +113,8 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::xlab("Date of Reporting") +
       ggplot2::scale_x_date(limits = c(lubridate::floor_date(min(df$date, na.rm = T)-7, "week", week_start = 1),
                                        lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
-                            breaks = seq.Date(from = as.Date(floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
-                                              to   = as.Date(floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
+                            breaks = seq.Date(from = as.Date(lubridate::floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
+                                              to   = as.Date(lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
                                               by   = "3 weeks"),
                             date_labels  = "%d\n%b") +
       ggplot2::scale_y_continuous(labels = comma,
@@ -135,8 +135,8 @@ plot_epicurve_ind <- function(df, type = "cases", incidence = T){
       ggplot2::xlab("Date of Reporting") +
       ggplot2::scale_x_date(limits = c(lubridate::floor_date(min(df$date, na.rm = T)-7, "week", week_start = 1),
                                        lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
-                            breaks = seq.Date(from = as.Date(floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
-                                              to   = as.Date(floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
+                            breaks = seq.Date(from = as.Date(lubridate::floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
+                                              to   = as.Date(lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
                                               by   = "3 weeks"),
                             date_labels  = "%d\n%b") +
       ggplot2::scale_y_continuous(labels = comma,
