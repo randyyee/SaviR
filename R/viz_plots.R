@@ -290,17 +290,16 @@ plot_riskmatrix <- function(df){
                    legend.title  = element_text(size = 9, family = "Calibri"),
                    plot.title    = element_text(size = 16, face = "bold", family = "Calibri"),
                    plot.subtitle = element_text(size = 11, family = "Calibri"),
-                   plot.margin   = unit(c(1,1.6,1.3,1),"cm"),
+                   plot.margin   = unit(c(0.5,0.5,0.5,0.5),"cm"),
                    plot.caption  = element_text(hjust = 0, size = 11, family = "Calibri")) +
     ggplot2::labs(title    = "Burden and Recent Trends",
                   subtitle = paste0("Average daily incidence per 100,000 population and 7-day percent change, by new cases in past 7 days\n",
                                     format(max(df$date)-13, "%B %d, %Y"), ' - ', format(max(df$date)-7, "%B %d, %Y"), ' to ',
                                     format(max(df$date)-6, "%B %d, %Y"), ' - ', format(max(df$date), "%B %d, %Y")),
-                  caption  = "
-         \nNotes:
-         -Includes countries with a population greater than 10 million people and more than 100 cases in the last week
-         -Countries with a population over 10 million are labeled if they are among the top ten highest countries for cases,
-         incidence, or weekly percent change in cases.")
+                  caption  = "Notes:
+      - Includes countries with a population greater than 10 million people and more than 100 cases in the last week
+      - Countries with a population over 10 million are labeled if they are among the top ten highest countries for cases,
+        incidence, or weekly percent change in cases.")
 }
 
 
@@ -346,14 +345,13 @@ plot_vaxcoverage <- function(df){
     ggplot2::guides(fill = guide_legend(reverse = TRUE, override.aes = list(size = 8))) +
     ggplot2::theme_bw() +
     ggplot2::labs(title = paste0("People Vaccinated per 100 people by WHO Region, ", format(max(df$date), "%B %d, %Y")),
-                  caption = "
-         \nNotes:
-      -People Vaccinated per 100: number of people who received at least one vaccine dose; does not represent
-      percent of population fully vaccinated
-      -Total vaccine doses administered: total doses given, does not represent number of people vaccinated
-      -Countries are labeled such that within each WHO Region, labeled countries are those that are the top 3 ranking countries
-      for people vaccinated per 100 and the top 3 ranking countries for total vaccine doses administered
-      -Vaccine data are incomplete and data may be out of date",
+                  caption = "Notes:
+      - People Vaccinated per 100: number of people who received at least one vaccine dose; does not represent
+        percent of population fully vaccinated
+      - Total vaccine doses administered: total doses given, does not represent number of people vaccinated
+      - Countries are labeled such that within each WHO Region, labeled countries are those that are the top 3 ranking countries
+        for people vaccinated per 100 and the top 3 ranking countries for total vaccine doses administered
+      - Vaccine data are incomplete and data may be out of date",
                   legend.title  = element_text(size = 10, face = "bold", family = "Calibri")) +
     ggplot2::theme(plot.title   = element_text(size = 14, face = "bold", family = "Calibri"),
                    axis.title   = element_text(size = 12, family = "Calibri"),
