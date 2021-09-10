@@ -31,7 +31,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                                  drop         = F,
                                  na.translate = T) +
       ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
-                     plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri"),
+                     plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri", margin=margin(0,0,5,0)),
                      plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
                      plot.caption.position = "plot",
                      legend.position       = c(0.02, 0.00),
@@ -57,7 +57,7 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                                labels       = category_color_labels, # Param
                                na.translate = T) +
     ggplot2::theme(plot.title            = ggplot2::element_text(size = 15, face="bold", family = "Calibri"),
-                   plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri"),
+                   plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri", margin=margin(0,0,5,0)),
                    plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
                    plot.caption.position = "plot",
                    legend.position       = c(0.02, 0.00),
@@ -101,8 +101,10 @@ map_burden <- function(df){
     } else {
       bbox <- sf::st_bbox(sf::st_as_sf(df))
     }
+    subt <- paste0("Average daily incidence over the past 7 days per 100,000 \npopulation ", str_squish(format(max(df$date), "%B %e, %Y")))
   } else {
     bbox <- sf::st_bbox(sf::st_as_sf(df))
+    subt <- paste0("Average daily incidence over the past 7 days per 100,000 population ", str_squish(format(max(df$date), "%B %e, %Y")))
   }
 
   cat_labs <- c("0- <1", "1- <10", "10- <25", "25+")
@@ -113,7 +115,7 @@ map_burden <- function(df){
                       ylim = bbox[c(2, 4)]) +
     ggplot2::labs(fill = "Average \nDaily \nIncidence \n(past 7 days) \nper 100,000") +
     ggplot2::labs(title = "Burden",
-                  subtitle = paste0("Average daily incidence over the past 7 days per 100,000 \npopulation ", format(max(df$date), "%B %d, %Y")))
+                  subtitle = subt)
 }
 
 
@@ -167,7 +169,7 @@ map_trend <- function(df){
 
 #' @title map_vaccinations
 #' @description Cross-sectional map: People vaccinated per 100 for each country or Fully vaccinated.
-#' @param df A dataframe with the following: region, country, date, percent_change AS 6-level factors (<1 1- <3, 3- <10, 10 -<30, 30+).
+#' @param df A dataframe with the following: region, country, date, people vaccinated per 100 AS 6-level factors (<1 1- <3, 3- <10, 10 -<30, 30+).
 #' @importFrom magrittr `%>%`
 #'
 #' @export
@@ -191,6 +193,9 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
   } else {
     bbox <- sf::st_bbox(sf::st_as_sf(df))
   }
+
+#  cat_labs <- c("<3", "3- <10", "10- <20", "20- <30", "30- <40", "40- <60", "60- <70", "70+")
+#  cat_vals <- c("#b1eeec","#98D1CF", "#7EB3B2", "#659695", "#4C7877", "#335B5A", "#193D3D", "#002020")
 
   if(vac_type == "People"){
     map_template(df,
