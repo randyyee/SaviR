@@ -20,11 +20,11 @@ table_countriesofconcern <- function(df_risk, df_vaccinations, df_vaccinations_m
         dplyr::ungroup() %>%
         dplyr::mutate(Country                                   = country,
                       Date                                      = date,
-                      `New Cases (Incidence per 100,000)`       = paste0(comma(round(new_cases)), " (", round(week_case_incidence, 2),")"),
+                      `New Cases (Incidence per 100,000)`       = paste0(comma(round(new_cases_7dav)), " (", round(week_case_incidence, 2),")"),
                       `7 Day Cases`                             = scales::comma(round(week_case)),
                       `Previous 7 Day Cases`                    = scales::comma(round(prev_week_case)),
                       `% Change in Cases from Previous 7 Days`  = scales::percent(percent_change_case, scale = 1),
-                      `New Deaths (Incidence per 100,000)`      = paste0(comma(round(new_deaths)), " (", round(week_death_incidence, 2),")"),
+                      `New Deaths (Incidence per 100,000)`      = paste0(comma(round(new_deaths_7dav)), " (", round(week_death_incidence, 2),")"),
                       `7 Day Deaths`                            = scales::comma(round(week_death)),
                       `Previous 7 Day Deaths`                   = scales::comma(round(prev_week_death)),
                       `% Change in Deaths from Previous 7 Days` = scales::percent(percent_change_death, scale = 1)) %>%
