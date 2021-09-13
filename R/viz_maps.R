@@ -169,7 +169,7 @@ map_trend <- function(df){
 
 #' @title map_vaccinations
 #' @description Cross-sectional map: People vaccinated per 100 for each country or Fully vaccinated.
-#' @param df A dataframe with the following: region, country, date, people vaccinated per 100 AS 6-level factors (<1 1- <3, 3- <10, 10 -<30, 30+).
+#' @param df A dataframe with the following: region, country, date, people vaccinated per 100 AS 8-level factors (<3, 3-<10, 10-<20, 20-<30, 30-<40, 40-<60, 60-<70, 70+).
 #' @importFrom magrittr `%>%`
 #'
 #' @export
@@ -194,13 +194,11 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
     bbox <- sf::st_bbox(sf::st_as_sf(df))
   }
 
-#  cat_labs <- c("<3", "3- <10", "10- <20", "20- <30", "30- <40", "40- <60", "60- <70", "70+")
-#  cat_vals <- c("#b1eeec","#98D1CF", "#7EB3B2", "#659695", "#4C7877", "#335B5A", "#193D3D", "#002020")
+  cat_labs <- c("<3", "3- <10", "10- <20", "20- <30", "30- <40", "40- <60", "60- <70", "70+")
+  cat_vals <- c("#b1eeec","#98D1CF", "#7EB3B2", "#659695", "#4C7877", "#335B5A", "#193D3D", "#002020")
 
   if(vac_type == "People"){
-    map_template(df,
-                 c("<1", "1- <3", "3- <10", "10- <30", "30+"),
-                 c("#d4ece8","#a2d9d2", "#1f9fa9", "#005e70", "#27343a")) +
+    map_template(df, cat_labs, cat_vals) +
       labs(title    = "People Vaccinated per 100 People",
            subtitle = paste0("Data as of ",format(max(df$date), "%B %d, %Y"),"\nNumber of people out of 100 who received at least one vaccine dose; \ndoes not represent percent of population fully vaccinated"),
            caption  = "Note:
@@ -210,7 +208,7 @@ map_vaccinations <- function(df, vac_type = c("People", "Fully")){
       ggplot2::coord_sf(xlim = bbox[c(1, 3)],
                         ylim = bbox[c(2, 4)])
   } else {
-    map_template(df, c("<1", "1- <3", "3- <10", "10- <30", "30+"), c("#CCECE6","#99D8C9", "#66C2A4", "#2CA25F", "#006D2C")) +
+    map_template(df, cat_labs, cat_vals) +
       labs(title    = "People Fully Vaccinated per 100 People",
            subtitle = paste0("Data as of ", format(max(df$date), "%B %d, %Y"),"\nRepresents percent of population fully vaccinated"),
            caption  = "Note:
