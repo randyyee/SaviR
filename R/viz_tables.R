@@ -12,6 +12,8 @@
 
 table_countriesofconcern <- function(df_risk, df_vaccinations, df_vaccinations_maufacturers, country_list){
 
+  str_border = officer::fp_border(color = "#808080")
+
   as.data.frame(
     t(
       dplyr::filter(df_risk, country %in% country_list) %>%
@@ -50,7 +52,18 @@ table_countriesofconcern <- function(df_risk, df_vaccinations, df_vaccinations_m
     tibble::rownames_to_column(" ") %>%
     purrr::set_names(.[1,]) %>%
     dplyr::filter(Country != "Country") %>%
-    flextable::flextable()
+    flextable::flextable() %>%
+    flextable::font(fontname = "Calibri", part = "all") %>%
+    flextable::fontsize(size = 9, part = "all") %>%
+    flextable::color(color = "white", part = "header") %>%
+    flextable::bold(bold = TRUE, part = "header") %>%
+    flextable::bg(bg = "#1F497D", part = "header") %>%
+    flextable::bg(bg = "#D6D6D6", j = 1) %>%
+    flextable::width(width = 1, unit = "in") %>%
+    flextable::width(j = 1, 2.25, unit = "in") %>%
+    flextable::hline(border = str_border) %>%
+    flextable::vline(border = str_border) %>%
+    flextable::border_outer(border = str_border)
 
 }
 
