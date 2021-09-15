@@ -22,14 +22,16 @@ table_countriesofconcern <- function(df_risk, df_vaccinations, df_vaccinations_m
         dplyr::ungroup() %>%
         dplyr::mutate(Country                                   = country,
                       Date                                      = date,
-                      `New Cases (Incidence per 100,000)`       = paste0(comma(round(new_cases_7dav)), " (", round(week_case_incidence, 2),")"),
+#                     `New Cases (Incidence per 100,000)`       = paste0(comma(round(new_cases_7dav)), " (", round(week_case_incidence, 2),")"),
+                      `New Cases 7 Day Average\n(7 Day Average Case Incidence per 100,000)` = paste0(format(round(new_cases_7dav, 1), format = "f", big.mark = ",", drop0trailing = TRUE), "\n(", round(week_case_incidence, 2),")"),
                       `7 Day Cases`                             = scales::comma(round(week_case)),
                       `Previous 7 Day Cases`                    = scales::comma(round(prev_week_case)),
-                      `% Change in Cases from Previous 7 Days`  = scales::percent(percent_change_case, scale = 1),
-                      `New Deaths (Incidence per 100,000)`      = paste0(comma(round(new_deaths_7dav)), " (", round(week_death_incidence, 2),")"),
+                      `% Change in Cases from Previous 7 Days`  = scales::percent(percent_change_case, scale = 1, drop0trailing = TRUE),
+#                     `New Deaths (Incidence per 100,000)`      = paste0(comma(round(new_deaths_7dav)), " (", round(week_death_incidence, 2),")"),
+                      `New Deaths 7 Day Average\n(7 Day Average Death Incidence per 100,000)` = paste0(format(round(new_deaths_7dav, 1), format = "f", big.mark = ",", drop0trailing = TRUE), "\n(", round(week_death_incidence, 2),")"),
                       `7 Day Deaths`                            = scales::comma(round(week_death)),
                       `Previous 7 Day Deaths`                   = scales::comma(round(prev_week_death)),
-                      `% Change in Deaths from Previous 7 Days` = scales::percent(percent_change_death, scale = 1)) %>%
+                      `% Change in Deaths from Previous 7 Days` = scales::percent(percent_change_death, scale = 1, drop0trailing = TRUE)) %>%
         dplyr::select(Country:`% Change in Deaths from Previous 7 Days`) %>%
         dplyr::left_join(
           dplyr::filter(df_vaccinations, location %in% country_list) %>%
@@ -60,7 +62,7 @@ table_countriesofconcern <- function(df_risk, df_vaccinations, df_vaccinations_m
     flextable::bg(bg = "#1F497D", part = "header") %>%
     flextable::bg(bg = "#D6D6D6", j = 1) %>%
     flextable::width(width = 1, unit = "in") %>%
-    flextable::width(j = 1, 2.25, unit = "in") %>%
+    flextable::width(j = 1, 2.5, unit = "in") %>%
     flextable::hline(border = str_border) %>%
     flextable::vline(border = str_border) %>%
     flextable::border_outer(border = str_border)
