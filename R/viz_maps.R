@@ -34,9 +34,10 @@ map_template <- function(df, category_color_labels = "None", category_color_valu
                      plot.subtitle         = ggplot2::element_text(size = 10, family = "Calibri", margin=margin(0,0,5,0)),
                      plot.caption          = ggplot2::element_text(size = 8,  family = "Calibri", hjust = 0),
                      plot.caption.position = "plot",
-                     legend.position       = c(0.02, 0.00),
+                     legend.position       = c(0.01, 0.00),
                      legend.justification  = c("left", "bottom"),
                      legend.box.just       = "left",
+                     legend.key.size       = unit(0.5, 'cm'),
                      legend.margin         = ggplot2::margin(3, 3, 3, 3),
                      legend.title          = ggplot2::element_text(size = 10, family = "Calibri"),
                      legend.text           = ggplot2::element_text(size = 8,  family = "Calibri"))
