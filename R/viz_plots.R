@@ -6,39 +6,56 @@
 #' @param df A dataframe with the following: region, country, date, new_cases.
 #' For WHO default, region should be factors with levels of AMRO, EURO, SEARO, EMRO, AFRO, and WPRO.
 #' Produces an epi curve, region stacked bar plot for each epi-week (Monday-Sunday).
+#' @param by_cat WHO (default) or State
 #' @param transparent Default TRUE - returns a transparent plot.
-#' @param who.col.pal Default color pallet for all regions. Specify specific region color for individual region.
-#' @param regions Default all WHO regions. Specify specific region label for individual region.
 #'
 #' @importFrom magrittr `%>%`
 #'
 #' @export
 
-plot_epicurve <- function(df, region = "Global", transparent = T){
+plot_epicurve <- function(df, by_cat = "WHO", transparent = T){
 
-  region_abbv <- c("AMRO", "EURO", "SEARO", "EMRO", "AFRO", "WPRO")
-  who.col.pal <- c("#aa001e", "#e7b351", "#00818a", "#d26230", "#005e70", "#d4ece8")
-  names       <- c("Americas", "Europe", "Southeast Asia", "Eastern \nMediterranean", "Africa", "Western Pacific")
-  col_master  <- data.frame(region_abbv, names, who.col.pal)
-
-  if(length(unique(df$region)) > 1){
-    regions      <- col_master$names
-    pallete      <- col_master$who.col.pal
-    gtitle       <- "Confirmed COVID-19 Cases by Week of Report and WHO Region"
-    region_label <- "WHO Region"
-    legend       <- "right"
+  if(by_cat == "WHO") {
+    region_abbv <- c("AMRO", "EURO", "SEARO", "EMRO", "AFRO", "WPRO")
+    names       <- c("Americas", "Europe", "Southeast Asia", "Eastern Mediterranean", "Africa", "Western Pacific")
+    col.pal     <- c("#aa001e", "#e7b351", "#00818a", "#d26230", "#005e70", "#d4ece8")
+    df          <- df %>% mutate(cat = factor(who_region,levels = c("AMRO",
+                                                                    "EURO",
+                                                                    "SEARO",
+                                                                    "EMRO",
+                                                                    "AFRO",
+                                                                    "WPRO")))
   } else {
-    regions      <- col_master[region_abbv == as.character(unique(df$who_region)), ]$names
-    pallete      <- col_master[region_abbv == as.character(unique(df$who_region)), ]$who.col.pal
-    gtitle       <- paste0("Confirmed COVID-19 Cases – ", r, " Region")
-    region_label <- ""
+    region_abbv <- c("East Asia and the Pacific", "Europe and Eurasia", "Near East (Middle East and Northern Africa)", "South and Central Asia", "Sub-Saharan Africa", "Western Hemisphere", "US")
+    names       <- c("East Asia and the Pacific", "Europe and Eurasia", "Near East \n(Middle East and Northern Africa)", "South and Central Asia", "Sub-Saharan Africa", "Western Hemisphere \n(not incl US)", "US")
+    col.pal     <- c("#d00000", "#FFBA08", "#3F88C5", "#032B43", "#136F63", "#a5c651", "#D64550")
+    df          <- df %>% mutate(cat = factor(state_region,levels = c("East Asia and the Pacific",
+                                                                      "Europe and Eurasia",
+                                                                      "Near East (Middle East and Northern Africa)",
+                                                                      "South and Central Asia",
+                                                                      "Sub-Saharan Africa",
+                                                                      "Western Hemisphere",
+                                                                      "US")))
+  }
+  col_master <- data.frame(region_abbv, names, col.pal)
+  if(length(unique(df$region)) > 1) {
+    regions      <- col_master$names
+    pallete      <- col_master$col.pal
+    gtitle       <- paste0("Confirmed COVID-19 Cases by Week of Report and ", by_cat, " Region")
+    legend       <- "right"
+    region_label <- paste0(by_cat," Region")
+  } else {
+    regions      <- col_master[region_abbv == as.character(unique(ifelse(by_cat == "WHO", df$who_region, df$state_region))), ]$names
+    pallete      <- col_master[region_abbv == as.character(unique(ifelse(by_cat == "WHO", df$who_region, df$state_region))), ]$col.pal
+    gtitle       <- paste0("Confirmed COVID-19 Cases ", regions, " Region")
     legend       <- "none"
+    region_label <- ""
   }
 
   g <- ggplot2::ggplot(data     = df,
                        mapping = aes(x    = lubridate::floor_date(date, "week", week_start = 1),
                                      y    = new_cases,
-                                     fill = region)) +
+                                     fill = cat)) +
     ggplot2::geom_bar(position = "stack",
                       stat     = "identity",
                       alpha    = 0.9) +
@@ -65,7 +82,8 @@ plot_epicurve <- function(df, region = "Global", transparent = T){
                    axis.title      = ggplot2::element_text(size  = 12, family = "Calibri"),
                    legend.title    = ggplot2::element_text(size  = 12, face = "bold", family = "Calibri"),
                    legend.text     = ggplot2::element_text(size  = 9,  family = "Calibri"),
-                   legend.position = legend) +
+                   legend.position = legend,
+                   legend.key.size = unit(0.5, 'cm')) +
     ggplot2::guides(fill = ggplot2::guide_legend(overide.aex  = list(size = 9)))
 
   if(transparent == T){
