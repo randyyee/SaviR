@@ -339,26 +339,97 @@ plot_riskmatrix <- function(df){
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #' @title plot_vaxcoverage
-#' @description Plot vaccination coverage by region.
+#' @description Plot vaccination coverage (partial or fully) by WHO region(s), State region(s), or Income levels.
 #' @param df A dataframe with vaccination stats.
 #'
 #' @importFrom magrittr `%>%`
 #'
 #' @export
 
-plot_vaxcoverage <- function(df){
+plot_vaxcoverage <- function(df, type = "partial", by_cat = "State Region") {
+
+  if(by_cat == "WHO Region") {
+    cat_values <- c("AMRO", "EURO", "SEARO", "EMRO", "AFRO", "WPRO")
+    cat_names  <- c("Americas", "Europe", "Southeast Asia", "Eastern Mediterranean", "Africa", "Western Pacific")
+    cat_colors <- c("#aa001e", "#e7b351", "#00818a", "#d26230", "#005e70", "#d4ece8")
+    df_c       <- df %>% dplyr::mutate(cat = factor(who_region,levels = cat_values))
+  } else if(by_cat == "State Region") {
+    cat_values <- c("East Asia and the Pacific",
+                    "Europe and Eurasia",
+                    "Near East (Middle East and Northern Africa)",
+                    "South and Central Asia",
+                    "Sub-Saharan Africa",
+                    "Western Hemisphere",
+                    "US",
+                    "None-state")
+    cat_names  <- c("East Asia and the Pacific",
+                    "Europe and Eurasia",
+                    "Near East (Middle East and Northern Africa)",
+                    "South and Central Asia",
+                    "Sub-Saharan Africa",
+                    "Western Hemisphere (not incl US)",
+                    "US",
+                    "None-state")
+    cat_colors <- c("#d00000", "#ffba08", "#3f88c5", "#032b43", "#136f63", "#a5c651", "#d64550", "#808080")
+    df_c       <- df %>% dplyr::mutate(cat = factor(state_region,levels = cat_values))
+  } else if(by_cat == "Income Level") {
+    cat_values <- c("High income", "Upper middle income", "Lower middle income", "Low income", "Not classified")
+    cat_names  <- cat_values
+    cat_colors <- c("#045a8d", "#74a9cf", "#fdbb84", "#d7301f", "#808080")
+    df_c       <- df %>% dplyr::mutate(cat = factor(incomelevel_value,levels = cat_values))
+  }
+  col_master <- data.frame(cat_values, cat_names, cat_colors)
+
+  category_color_labels <- col_master$cat_names
+  category_color_values <- col_master$cat_colors
+
+  if(type == "partial") {
+    df_c <- df_c %>%
+      group_by(cat) %>%
+      mutate(rank_people    = dense_rank(-people_vaccinated_per_hundred),
+             rank_total     = dense_rank(-total_vaccinations)) %>%
+      mutate(country_labels = case_when(rank_people %in% 1:3 ~ country,
+                                        rank_total  %in% 1:3 ~ country)) %>%
+      ungroup()
+    ptitle <- paste0("People Vaccinated per 100 people by ", by_cat, ", ", format(max(df$date), "%B %d, %Y"))
+    xlabel <- "People Vaccinated per 100"
+    cap    <- "Notes:
+    - People Vaccinated per 100: number of people who received at least one vaccine dose; does not represent
+      percent of population fully vaccinated
+    - Total vaccine doses administered: total doses given, does not represent number of people vaccinated
+    - Countries are labeled such that within each group, labeled countries are those that are the top 3 ranking countries
+      for people vaccinated per 100 and the top 3 ranking countries for total vaccine doses administered
+    - Vaccine data are incomplete and data may be out of date"
+  } else {
+    df_c <- df_c %>%
+      group_by(cat) %>%
+      mutate(rank_people    = dense_rank(-people_fully_vaccinated_per_hundred),
+             rank_total     = dense_rank(-total_vaccinations)) %>%
+      mutate(country_labels = case_when(rank_people %in% 1:3 ~ country,
+                                        rank_total  %in% 1:3 ~ country)) %>%
+      ungroup()
+    ptitle <- paste0("People Fully Vaccinated per 100 people by ", by_cat, ", ", format(max(df$date), "%B %d, %Y"))
+    xlabel <- "People Fully Vaccinated per 100"
+    cap    <- "Notes:
+    - Total vaccine doses administered: total doses given, does not represent number of people fully vaccinated
+    - Countries are labeled such that within each group, labeled countries are those that are the top 3 ranking countries
+      for people fully vaccinated per 100 and the top 3 ranking countries for total vaccine doses administered
+    - Vaccine data are incomplete and data may be out of date"
+  }
 
   my_pal_vax <- function(range = c(3, 25)) {
     force(range)
     function(x) scales::rescale(x, to = range, from = c(0, 1))
   }
 
-  ggplot2::ggplot(df, aes(x = people_vaccinated_per_hundred, y = who_region)) +
-    ggplot2::geom_point(aes(size = total_vaccinations, fill = who_region),
+  ggplot2::ggplot(df_c, aes(x = if(type == "partial") {people_vaccinated_per_hundred}
+                                else {people_fully_vaccinated_per_hundred},
+                            y = cat)) +
+    ggplot2::geom_point(aes(size = total_vaccinations, fill = cat),
                         shape = 21,
                         color = 'gray60',
-                        alpha = 0.6) +
-    ggrepel::geom_text_repel(aes(label = labels, point.size = total_vaccinations),
+                        alpha = 0.8) +
+    ggrepel::geom_text_repel(aes(label = country_labels, point.size = total_vaccinations),
                              color              = "gray25",
                              min.segment.length = 0,
                              max.overlaps       = Inf,
@@ -372,19 +443,15 @@ plot_vaxcoverage <- function(df){
                               labels = scales::comma, breaks = c(1000000, 50000000, 300000000, 750000000),
                               guide  = guide_legend(override.aes = list(label = "")),
                               name   = "Total vaccine \ndoses administered") +
-    ggplot2::scale_fill_brewer(name  = "WHO Region", palette = "Set1") +
-    ggplot2::scale_x_continuous(name = "People Vaccinated per 100") +
+    ggplot2::scale_fill_manual(name   = by_cat,
+                               values = category_color_values,
+                               labels = category_color_labels) +
+    ggplot2::scale_x_continuous(name = xlabel) +
     ggplot2::scale_y_discrete(name = NULL) +
     ggplot2::guides(fill = guide_legend(reverse = TRUE, override.aes = list(size = 8))) +
     ggplot2::theme_bw() +
-    ggplot2::labs(title = paste0("People Vaccinated per 100 people by WHO Region, ", format(max(df$date), "%B %d, %Y")),
-                  caption = "Notes:
-      - People Vaccinated per 100: number of people who received at least one vaccine dose; does not represent
-        percent of population fully vaccinated
-      - Total vaccine doses administered: total doses given, does not represent number of people vaccinated
-      - Countries are labeled such that within each WHO Region, labeled countries are those that are the top 3 ranking countries
-        for people vaccinated per 100 and the top 3 ranking countries for total vaccine doses administered
-      - Vaccine data are incomplete and data may be out of date",
+    ggplot2::labs(title = ptitle,
+                  caption = cap,
                   legend.title  = element_text(size = 10, face = "bold", family = "Calibri")) +
     ggplot2::theme(plot.title   = element_text(size = 14, face = "bold", family = "Calibri"),
                    axis.title   = element_text(size = 12, family = "Calibri"),
