@@ -1,72 +1,105 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #' @title plot_epicurve
-#' @description (EPI WEEK) Visualize epi curve by epi-weeks (Monday-Sunday) and by WHO region(s).
+#' @description (EPI WEEK) Visualize epi curve by epi-weeks (Monday-Sunday) and by WHO region(s), State region(s), or Income levels.
 #'
-#' @param df A dataframe with the following: region, country, date, new_cases.
-#' For WHO default, region should be factors with levels of AMRO, EURO, SEARO, EMRO, AFRO, and WPRO.
-#' Produces an epi curve, region stacked bar plot for each epi-week (Monday-Sunday).
+#' @param df A dataframe with the following: date, new_cases and one of these columns for by_cat: who_region, state_region, or incomelevel_value.
+#' Produces an epi curve, stacked bar plot for each epi-week (Monday-Sunday).
+#' @param by_cat = "WHO Region" (default), "State Region" or "Income Level"
+#' @param legend Default "in" - position legend inside the plot area.
 #' @param transparent Default TRUE - returns a transparent plot.
-#' @param who.col.pal Default color pallet for all regions. Specify specific region color for individual region.
-#' @param regions Default all WHO regions. Specify specific region label for individual region.
 #'
 #' @importFrom magrittr `%>%`
 #'
 #' @export
 
-plot_epicurve <- function(df, region = "Global", transparent = T){
+plot_epicurve <- function(df, by_cat = "WHO Region", legend = "in", transparent = T) {
 
-  region_abbv <- c("AMRO", "EURO", "SEARO", "EMRO", "AFRO", "WPRO")
-  who.col.pal <- c("#aa001e", "#e7b351", "#00818a", "#d26230", "#005e70", "#d4ece8")
-  names       <- c("Americas", "Europe", "Southeast Asia", "Eastern \nMediterranean", "Africa", "Western Pacific")
-  col_master  <- data.frame(region_abbv, names, who.col.pal)
+  if(grepl("WHO", by_cat, fixed = TRUE)) {
+    cat_values <- c("AMRO", "EURO", "SEARO", "EMRO", "AFRO", "WPRO")
+    cat_names  <- c("Americas", "Europe", "Southeast Asia", "Eastern Mediterranean", "Africa", "Western Pacific")
+    cat_colors <- c("#aa001e", "#e7b351", "#00818a", "#d26230", "#005e70", "#d4ece8")
+    df_c       <- df %>% dplyr::mutate(cat = factor(who_region,levels = cat_values))
+  } else if(grepl("State", by_cat, fixed = TRUE)) {
+    cat_values <- c("East Asia and the Pacific",
+                    "Europe and Eurasia",
+                    "Near East (Middle East and Northern Africa)",
+                    "South and Central Asia",
+                    "Sub-Saharan Africa",
+                    "Western Hemisphere",
+                    "US",
+                    "None-state")
+    cat_names  <- c("East Asia and the Pacific",
+                    "Europe and Eurasia",
+                    "Near East (Middle East and Northern Africa)",
+                    "South and Central Asia",
+                    "Sub-Saharan Africa",
+                    "Western Hemisphere (not incl US)",
+                    "US",
+                    "None-state")
+    cat_colors <- c("#d00000", "#ffba08", "#3f88c5", "#032b43", "#136f63", "#a5c651", "#d64550", "#808080")
+    df_c       <- df %>% dplyr::mutate(cat = factor(state_region,levels = cat_values))
+  } else if(grepl("Income", by_cat, fixed = TRUE)) {
+    cat_values <- c("High income", "Upper middle income", "Lower middle income", "Low income", "Not classified")
+    cat_names  <- cat_values
+    cat_colors <- c("#045a8d", "#74a9cf", "#fdbb84", "#d7301f", "#808080")
+    df_c       <- df %>% dplyr::mutate(cat = factor(incomelevel_value,levels = cat_values))
+  }
+  col_master <- data.frame(cat_values, cat_names, cat_colors)
 
-  if(length(unique(df$region)) > 1){
-    regions      <- col_master$names
-    pallete      <- col_master$who.col.pal
-    gtitle       <- "Confirmed COVID-19 Cases by Week of Report and WHO Region"
-    region_label <- "WHO Region"
-    legend       <- "right"
+  if(length(unique(df_c$cat)) > 1) {
+    category_color_labels <- col_master$cat_names
+    category_color_values <- col_master$cat_colors
+    gtitle                <- paste0("Confirmed COVID-19 Cases by Week of Report and ", by_cat)
   } else {
-    regions      <- col_master[region_abbv == as.character(unique(df$who_region)), ]$names
-    pallete      <- col_master[region_abbv == as.character(unique(df$who_region)), ]$who.col.pal
-    gtitle       <- paste0("Confirmed COVID-19 Cases – ", r, " Region")
-    region_label <- ""
-    legend       <- "none"
+    category_color_labels <- col_master[cat_values == as.character(unique(df_c$cat)), ]$cat_names
+    category_color_values <- col_master[cat_values == as.character(unique(df_c$cat)), ]$cat_colors
+    gtitle                <- paste0("Confirmed COVID-19 Cases by Week of Report in ", category_color_labels)
   }
 
-  g <- ggplot2::ggplot(data     = df,
+  g <- ggplot2::ggplot(data    = df_c,
                        mapping = aes(x    = lubridate::floor_date(date, "week", week_start = 1),
                                      y    = new_cases,
-                                     fill = region)) +
+                                     fill = cat)) +
     ggplot2::geom_bar(position = "stack",
                       stat     = "identity",
                       alpha    = 0.9) +
-    ggplot2::theme_classic() +
-    ggplot2::scale_fill_manual(values = pallete,
-                               labels = regions) +
+    ggplot2::labs(title    = gtitle,
+                  subtitle = paste0(str_squish(format(min(df_c$date, na.rm = T), "%B %e, %Y")), " - ",
+                                    str_squish(format(max(df_c$date, na.rm = T), "%B %e, %Y"))),
+                  fill     = by_cat) +
     ggplot2::ylab("Weekly Cases") +
     ggplot2::xlab("Week of Reporting") +
-    ggplot2::labs(fill = region_label) +
-    ggplot2::scale_x_date(limits = c(lubridate::floor_date(min(df$date, na.rm = T)-7, "week", week_start = 1),
-                                     lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
-                          breaks = seq.Date(from = as.Date(lubridate::floor_date(min(df$date, na.rm = T), "week", week_start = 1)),
-                                            to   = as.Date(lubridate::floor_date(max(df$date, na.rm = T)+7, "week", week_start = 1)),
-                                            by   = "3 weeks"),
-                          date_labels = "%d\n%b",
+    ggplot2::scale_x_date(limits = c(lubridate::floor_date(min(df_c$date, na.rm = T)-7, "week", week_start = 1),
+                                     lubridate::floor_date(max(df_c$date, na.rm = T)+7, "week", week_start = 1)),
+                          breaks = seq.Date(from = as.Date(lubridate::floor_date(min(df_c$date, na.rm = T), "week", week_start = 1)),
+                                            to   = as.Date(lubridate::floor_date(max(df_c$date, na.rm = T)+7, "week", week_start = 1)),
+                                            by   = "4 weeks"),
+                          date_labels = "%e\n%b",
                           expand      = c(0, 0)) +
     ggplot2::scale_y_continuous(expand = c(0, 5000),
                                 labels = scales::comma) +
-    ggplot2::labs(title    = gtitle,
-                  subtitle = paste0(format(min(df$date, na.rm = T), "%B %d, %Y"), " - ",
-                                    format(max(df$date, na.rm = T), "%B %d, %Y"))) +
+    ggplot2::scale_fill_manual(values = category_color_values,
+                               labels = category_color_labels) +
+    ggplot2::theme_classic() +
     ggplot2::theme(plot.title      = ggplot2::element_text(size  = 18, face = "bold", family = "Calibri"),
                    axis.text       = ggplot2::element_text(size  = 10, family = "Calibri"),
                    axis.title      = ggplot2::element_text(size  = 12, family = "Calibri"),
                    legend.title    = ggplot2::element_text(size  = 12, face = "bold", family = "Calibri"),
                    legend.text     = ggplot2::element_text(size  = 9,  family = "Calibri"),
-                   legend.position = legend) +
+                   legend.key.size = unit(0.5, 'cm')) +
     ggplot2::guides(fill = ggplot2::guide_legend(overide.aex  = list(size = 9)))
+
+  if(length(unique(df_c$cat)) > 1) {
+    if(legend == "in") {
+      g <- g + ggplot2::theme(legend.justification = c("left","top"),
+                              legend.position = c(0,1))
+    } else {
+      g <- g + ggplot2::theme(legend.position = legend)
+    }
+  } else {
+    g <- g + ggplot2::theme(legend.position = "none")
+  }
 
   if(transparent == T){
     return(g +
@@ -357,3 +390,128 @@ plot_vaxcoverage <- function(df){
                    axis.title   = element_text(size = 12, family = "Calibri"),
                    plot.caption = element_text(hjust = 0, size = 12, family = "Calibri"))
 }
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#' @title plot_vaxcurve
+#' @description Visualize vaccine coverage by date of reporting and by WHO region(s), State region(s), or Income levels.
+#'
+#' @param df A dataframe with the following: date, people_vaccinated_per_hundred or people_fully_vaccinated_per_hundred, and one of these columns for by_cat: who_region, state_region, or incomelevel_value.
+#' @param type = "partial" (default) for partial vaccinated or "full" for fully vaccinated 
+#' @param by_cat = "State Region" (default), "WHO Region" or "Income Level"
+#' @param countries = "All" (default) for all countries or "AMC/AU" for AMC/AU countries (n=100)
+#'
+#' @importFrom magrittr `%>%`
+#'
+#' @export
+
+plot_vaxcurve <- function(df, type = "partial", by_cat = "Dept. of State Region", countries = "All") {
+  
+  if(grepl("WHO", by_cat, fixed = TRUE)) {
+    cat_values <- c("AMRO", "EURO", "SEARO", "EMRO", "AFRO", "WPRO")
+    cat_names  <- c("Americas", "Europe", "Southeast Asia", "Eastern Mediterranean", "Africa", "Western Pacific")
+    cat_colors <- c("#aa001e", "#e7b351", "#00818a", "#d26230", "#005e70", "#d4ece8")
+    cat_lines  <- c("solid", "solid", "solid", "solid", "solid", "solid")
+    df_c       <- df %>% dplyr::mutate(cat = factor(who_region,levels = cat_values))
+  } else if(grepl("State", by_cat, fixed = TRUE)) {
+    if(countries == "AMC/AU") {
+      cat_values <- c("East Asia and the Pacific",
+                      "Europe and Eurasia",
+                      "Near East (Middle East and Northern Africa)",
+                      "South and Central Asia",
+                      "Sub-Saharan Africa",
+                      "Western Hemisphere",
+                      "None-state")
+      cat_names  <- c("East Asia and the Pacific",
+                      "Europe and Eurasia",
+                      "Near East (Middle East and Northern Africa)",
+                      "South and Central Asia",
+                      "Sub-Saharan Africa",
+                      "Western Hemisphere",
+                      "None-state")
+      cat_colors <- c("#d00000", "#ffba08", "#3f88c5", "#032b43", "#136f63", "#a5c651", "#808080")
+      cat_lines  <- c("solid", "solid", "solid", "solid", "solid", "solid", "solid")
+    } else {
+      cat_values <- c("East Asia and the Pacific",
+                      "Europe and Eurasia",
+                      "Near East (Middle East and Northern Africa)",
+                      "South and Central Asia",
+                      "Sub-Saharan Africa",
+                      "Western Hemisphere",
+                      "US",
+                      "None-state")
+      cat_names  <- c("East Asia and the Pacific",
+                      "Europe and Eurasia",
+                      "Near East (Middle East and Northern Africa)",
+                      "South and Central Asia",
+                      "Sub-Saharan Africa",
+                      "Western Hemisphere (not incl US)",
+                      "US",
+                      "None-state")
+      cat_colors <- c("#d00000", "#ffba08", "#3f88c5", "#032b43", "#136f63", "#a5c651", "#aaaaaa", "#808080")
+      cat_lines  <- c("solid", "solid", "solid", "solid", "solid", "solid", "dashed", "solid")
+    }
+    df_c       <- df %>% dplyr::mutate(cat = factor(state_region,levels = cat_values))
+  } else if(grepl("Income", by_cat, fixed = TRUE)) {
+    cat_values <- c("High income", "Upper middle income", "Lower middle income", "Low income", "Not classified")
+    cat_names  <- cat_values
+    cat_colors <- c("#045a8d", "#74a9cf", "#fdbb84", "#d7301f", "#aaaaaa")
+    cat_lines  <- c("solid", "solid", "solid", "solid", "solid")
+    df_c       <- df %>% dplyr::mutate(cat = factor(incomelevel_value,levels = cat_values))
+  }
+  col_master <- data.frame(cat_values, cat_names, cat_colors, cat_lines)
+  
+  category_labels       <- col_master$cat_names
+  category_color_values <- col_master$cat_colors
+  category_line_values  <- col_master$cat_lines
+  if(type == "full") {
+    gtitle <- "People fully vaccinated per 100 people"
+  } else {
+    gtitle <- "People with at least one vaccine dose per 100 people"
+  }
+  if(countries != "All") {
+    gtitle <- paste0(gtitle, " in ", countries, " countries")
+  }
+  
+  g <- ggplot2::ggplot(data    = df_c,
+                       mapping = aes(x        = date,
+                                     y        = if(type == "full") {people_fully_vaccinated_per_hundred_r} 
+                                     else {people_vaccinated_per_hundred_r},
+                                     colour   = cat,
+                                     linetype = cat)) +
+    ggplot2::geom_line() +
+    ggplot2::labs(title    = gtitle,
+                  subtitle = paste0("by ", by_cat),
+                  color    = by_cat, 
+                  linetype = by_cat) +
+    ggplot2::xlab("Date of Reporting") +
+    ggplot2::ylab(if(type == "full") {"People fully vaccinated per 100"} 
+                  else {"People vaccinated with at least one dose per 100"}) +
+    ggplot2::scale_x_date(labels = function(x) format(x, "%b%e,\n%Y"),
+                          limits = c(min(df_c$date), max(df_c$date)),
+                          breaks = "1 month") +
+    ggplot2::scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 20)) +
+    ggplot2::scale_color_manual(values = category_color_values,
+                                labels = category_labels) +
+    ggplot2::scale_linetype_manual(values = category_line_values,
+                                   labels = category_labels) +
+    ggplot2::theme_classic() +
+    ggplot2::theme(plot.title      = element_text(size  = 15, family = "Calibri", face = "bold"),
+                   plot.subtitle   = element_text(size  = 14, family = "Calibri", face = "bold", margin=margin(0,0,10,0)),
+                   plot.margin     = unit(c(0.5,0.5,0.5,0.5),"cm"),
+                   axis.title.x    = element_text(size  = 12, family = "Calibri", margin=margin(10,0,0,0)),
+                   axis.title.y    = element_text(size  = 12, family = "Calibri", margin=margin(0,10,0,0)),
+                   axis.text       = element_text(size  = 10, family = "Calibri"),
+                   legend.title    = element_text(size  = 12, family = "Calibri", face = "bold"),
+                   legend.text     = element_text(size  = 8,  family = "Calibri"),
+                   legend.position = c(0.2, 0.7))
+
+  if(type == "full") {
+    return(g + ggplot2::geom_hline(yintercept = 20, color = "black"))
+  } else {
+    return(g)
+  }
+
+}
+
