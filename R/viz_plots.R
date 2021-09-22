@@ -31,7 +31,7 @@ plot_epicurve <- function(df, by_cat = "WHO Region", legend = "in", transparent 
                     "None-state")
     cat_names  <- c("East Asia and the Pacific",
                     "Europe and Eurasia",
-                    "Near East (Middle East and Northern Africa)",
+                    "Near East (Middle East and North Africa)",
                     "South and Central Asia",
                     "Sub-Saharan Africa",
                     "Western Hemisphere (not incl US)",
@@ -82,7 +82,7 @@ plot_epicurve <- function(df, by_cat = "WHO Region", legend = "in", transparent 
     ggplot2::scale_fill_manual(values = category_color_values,
                                labels = category_color_labels) +
     ggplot2::theme_classic() +
-    ggplot2::theme(plot.title      = ggplot2::element_text(size  = 18, face = "bold", family = "Calibri"),
+    ggplot2::theme(plot.title      = ggplot2::element_text(size  = 17, face = "bold", family = "Calibri"),
                    axis.text       = ggplot2::element_text(size  = 10, family = "Calibri"),
                    axis.title      = ggplot2::element_text(size  = 12, family = "Calibri"),
                    legend.title    = ggplot2::element_text(size  = 12, face = "bold", family = "Calibri"),
@@ -364,7 +364,7 @@ plot_vaxcoverage <- function(df, type = "partial", by_cat = "State Region") {
                     "None-state")
     cat_names  <- c("East Asia and the Pacific",
                     "Europe and Eurasia",
-                    "Near East (Middle East and Northern Africa)",
+                    "Near East (Middle East and North Africa)",
                     "South and Central Asia",
                     "Sub-Saharan Africa",
                     "Western Hemisphere (not incl US)",
@@ -492,7 +492,7 @@ plot_vaxcurve <- function(df, type = "partial", by_cat = "Dept. of State Region"
                       "None-state")
       cat_names  <- c("East Asia and the Pacific",
                       "Europe and Eurasia",
-                      "Near East (Middle East and Northern Africa)",
+                      "Near East (Middle East and North Africa)",
                       "South and Central Asia",
                       "Sub-Saharan Africa",
                       "Western Hemisphere",
@@ -510,7 +510,7 @@ plot_vaxcurve <- function(df, type = "partial", by_cat = "Dept. of State Region"
                       "None-state")
       cat_names  <- c("East Asia and the Pacific",
                       "Europe and Eurasia",
-                      "Near East (Middle East and Northern Africa)",
+                      "Near East (Middle East and North Africa)",
                       "South and Central Asia",
                       "Sub-Saharan Africa",
                       "Western Hemisphere (not incl US)",
