@@ -54,7 +54,7 @@ plot_epicurve <- function(df, by_cat = "WHO Region", legend = "in", transparent 
   } else {
     category_color_labels <- col_master[cat_values == as.character(unique(df_c$cat)), ]$cat_names
     category_color_values <- col_master[cat_values == as.character(unique(df_c$cat)), ]$cat_colors
-    gtitle                <- paste0("Confirmed COVID-19 Cases by Week of Report in ", category_color_labels)
+    gtitle                <- paste0("Confirmed COVID-19 Cases - ", category_color_labels)
   }
 
   g <- ggplot2::ggplot(data    = df_c,
