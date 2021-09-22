@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Authors@R: person("Randy", "Yee", email = "pcx5@cdc.gov", role = c("aut", "cre"))
 Maintainer: Randy Yee <pcx5@cdc.gov>
 Description: Data access and management of open-source COVID data for the production of analytic datasets.
-License: MIT + file LICENSE
+License: Apache + file LICENSE
 Imports: 
     tidyverse,
     maps,
