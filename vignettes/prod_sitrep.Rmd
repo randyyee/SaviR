@@ -242,6 +242,65 @@ for (r in unique(filter(df, !is.na(who_region))$who_region)){
 }
 ```
 
+## Top 10 Fully Vaccinated Table
+
+```{r}
+table_10fullyvaccinations <- function(df, type = "Global", run_date = "Enter a date"){
+
+  if(type == "Global"){
+    title_label <-  gt::html(paste0("<b>Top 10 Countries/ Areas with Highest <br> Fully Vaccinated per 100 People", "</b>"))
+    exclude_note <- "Countries with population size less than or equal to 1 million were excluded"
+  } else {
+    title_label  <- gt::html(paste0("<b>10 (", type, ") Countries/ Areas with Highest <br> Vaccination per 100 People", "</b>"))
+    exclude_note <- "Countries with population size less than or equal to 100,000 were excluded"
+  }
+
+  gt::gt(df) %>%
+    gt::tab_header(title    = title_label)%>%
+    gt::fmt_number(columns  = c(value1),
+                   decimals = 1) %>%
+    gt::fmt_number(columns  = c(value2),
+                   sep_mark = ",",
+                   decimals = 2 ) %>%
+    gt::data_color(columns  = c(value1),
+                   colors   = scales::col_bin(palette = c("#CCECE6", "#AFDACB", "#92C8B1", "#75B696", "#57A37C", "#3A9161", "#1D7F47", "#006D2C"),
+                                      bins    = c(0, 3, 10, 20, 30, 40, 60, 70, Inf))) %>%
+    gt::cols_label(country  = "Country/ Area",
+                   value1   = gt::html("People Fully Vaccinated <br> per 100 People"),
+                   value2   = gt::html("Daily Vaccines <br> Administered <br> per 100 People")) %>%
+    gt::cols_align("center") %>%
+    gt::tab_options(column_labels.font.weight = "bold",
+                table.font.size           = 20,
+                table.font.weight         = "bold",
+                footnotes.font.size       = pct(70),
+                source_notes.font.size    = pct(70),
+                source_notes.padding      = 0,
+                footnotes.padding         = 0) %>%
+
+    gt::tab_footnote(footnote  = "Number of people out of 100 who are fully vaccinated",
+                     locations = cells_column_labels(columns = c(value1))) %>%
+    gt::tab_footnote(footnote  = "Vaccine doses administered per day (7 day rolling average); does not represent number of people vaccinated",
+                     locations = cells_column_labels(columns = c(value2))) %>%
+    gt::tab_footnote(footnote  = exclude_note,
+                     locations = cells_title()) %>%
+    gt::tab_source_note(source_note = paste0("Data as of ", run_date))
+}
+
+df %>% 
+  filter(date <= sunday_date) %>%
+  filter(id != "CHN" | source != "WHO") %>%
+  filter(population > 1000000) %>%
+  group_by(country) %>%
+  filter(!is.na(people_fully_vaccinated_per_hundred)) %>%
+  filter(date == max(date)) %>%
+  ungroup() %>%
+  select(country = who_country, value1 = people_fully_vaccinated_per_hundred, value2 = daily_vaccinations_per_hundred) %>%
+  arrange(desc(value1)) %>%
+  head(10) %>%
+  table_10fullyvaccinations(., run_date = format(sunday_date, "%B %d, %Y")) %>%
+  gtsave(filename =  paste0("top_10_vax_table", Sys.Date(), ".png"), vwidth = 650)
+```
+
 
 ## Risk Matrix (Global Only)
 
