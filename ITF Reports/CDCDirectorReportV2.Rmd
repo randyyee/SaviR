@@ -1,0 +1,273 @@
+---
+title: "CDC Director Update"
+author: "ITF-SAVI"
+date: "`r format(Sys.Date(), '%m/%d/%y')`"
+output:
+  word_document: default
+
+---
+
+```{r Setup, include=FALSE}
+# Updates happen on Monday and Wednesday - 3-4PM
+knitr::opts_chunk$set(cache=FALSE)
+
+#detach("package:ITFAnalytics", unload = TRUE)
+#devtools::install_github("randyyee/ITFAnalytics")
+library(ITFAnalytics)
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(sf)
+library(gridExtra)
+library(openxlsx)
+```
+
+```{r Data Import, include=FALSE, cache=FALSE}
+
+c_list   <- c("Ethiopia", "Kenya", "Senegal", "Jamaica", "India")
+
+df       <- get_covid_df()
+df2      <- onetable %>% 
+  right_join(df %>% select(-who_region), by = c("iso2code" = "country_code")) %>% 
+  calc_add_risk()
+variants <- read.xlsx(paste0("C:/Users/", Sys.getenv("USERNAME"), "/CDC/ITF-COVID19-SAVI - Documents/Routine Reports/3. Variant Maps/Inputs/20210804_Variant_Tracker_shared_with_Partners.xlsx"), sheet = 1) 
+df_vax   <- get_vax()
+df_man   <- get_vax_manufacturers()
+```
+
+
+## Global Update
+
+- Last 7 days:
+```{r Global Update Bullet #1 (Calendar Date), include=FALSE, cache=FALSE}
+analysis_date   <- floor_date(Sys.Date(), "week", week_start = 7)
+who_date        <- max(filter(df, source == "WHO")$date)
+confirmed_cases <- sum(filter(df, source == "WHO")$new_cases, na.rm = T) 
+# QC: WHO Dashboard Top
+cases_pastweek  <- sum(filter(df, source == "WHO" & (date >= who_date-6))$new_cases, na.rm = T)
+# QC: WHO Dashboard Table
+total_deaths    <- sum(filter(df, source == "WHO")$new_deaths, na.rm = T)
+
+top_5_cases <- filter(df, (date >= who_date - 6) & (date <= who_date)) %>%
+  filter((source == "WHO" & country != "China") | source == "JHU") %>%
+  group_by(country) %>%
+  summarise(past_week_total = sum(new_cases, na.rm = T)/7) %>%
+  ungroup() %>%
+  mutate(label = paste0("(", comma(round(past_week_total)),")")) %>%
+  unite(country, country, label, sep = " ") %>%
+  arrange(desc(past_week_total)) %>%
+  top_n(5)
+
+last_complete_epi <- floor_date(who_date, "week", week_start = 1)-7
+```
+  - Global confirmed COVID-19 cases as of `r format(who_date, "%B %d")` totaled `r comma(confirmed_cases)`, with `r comma(cases_pastweek)` cases in the last 7 days. The cumulative number of deaths is `r comma(total_deaths)`.
+  - Countries reporting the highest cases counts in the last week are `r top_5_cases$country[1]`, `r top_5_cases$country[2]`, `r top_5_cases$country[3]`, `r top_5_cases$country[4]`, and `r top_5_cases$country[5]`.
+
+
+- Comparing week ending on `r format(analysis_date, "%B %d")` compared with the previous complete epi week:
+```{r Global Update Bullet #2 (Epi Week), include=FALSE, cache=FALSE}
+# QC: WHO Dashboard Top
+cases_pastweek  <- sum(filter(df, source == "WHO" & (date >= floor_date(who_date, "week", week_start = 1)-7) & date < floor_date(who_date, "week", week_start = 1))$new_cases, na.rm = T)
+# QC: WHO Dashboard Top
+cases_prevweek  <- sum(filter(df, source == "WHO" & (date >= floor_date(who_date, "week", week_start = 1)-14 & date < floor_date(who_date, "week", week_start = 1)-7))$new_cases, na.rm = T) 
+# QC: CQC
+change          <- (cases_pastweek - cases_prevweek)/cases_prevweek
+# QC: WHO Dashboard Top
+deaths_pastweek <- sum(filter(df, source == "WHO" & (date >= floor_date(who_date, "week", week_start = 1)-7) & date < floor_date(who_date, "week", week_start = 1))$new_deaths, na.rm = T)
+# QC: WHO Dashboard Top
+deaths_prevweek <- sum(filter(df, source == "WHO" & (date >= floor_date(who_date, "week", week_start = 1)-14 & date < floor_date(who_date, "week", week_start = 1)-7))$new_deaths, na.rm = T) 
+# QC: CQC
+d_change        <- (deaths_pastweek - deaths_prevweek)/deaths_prevweek
+
+highest_perchange <- df2 %>% 
+  filter(who_region != "Other") %>%
+  filter(weekdate < max(weekdate)) %>% #
+  filter(weekdate == max(weekdate) | (weekdate == max(weekdate) - 7)) %>%
+  group_by(region, weekdate) %>%
+  summarise(Total = sum(new_cases, na.rm = T)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = weekdate, values_from = Total) %>%
+  mutate(change  = (.[[3]] - .[[2]])/.[[2]],
+         label   = paste0("(", percent(change, accuracy = 0.1),")")) %>%
+  unite(label, region, label, sep = " ") %>%
+  arrange(desc(change))
+
+increase_regions <- filter(highest_perchange, change > 0) %>% 
+  select(label) %>% 
+  lapply(., toString)
+decrease_regions <- filter(highest_perchange, change < 0) %>% 
+  select(label) %>% 
+  lapply(., toString)
+
+highest_perchange <- df2 %>%
+  left_join(country_populations) %>%
+  filter(`2020` > 10000000) %>%
+  filter(weekdate < max(weekdate)) %>% #
+  filter(weekdate >= max(weekdate) - 7) %>%
+  group_by(country, weekdate) %>%
+  summarise(Total = sum(new_cases, na.rm = T)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = weekdate, values_from = Total) %>%
+  mutate(change = (.[[3]] - .[[2]])/.[[2]],
+         label   = paste0("(", percent(change, accuracy = 0.1),")")) %>%
+  unite(label, country, label, sep = " ") %>%
+  arrange(change)
+
+increase_countries <- highest_perchange %>%
+  filter(change > 0 & !is.infinite(change)) %>% 
+  top_n(n = 5, wt = change) %>% 
+  select(label) %>% 
+  lapply(., toString)
+```
+  - Overall cases `r ifelse(change > 0, paste("increased", percent(change, accuracy=0.1)), paste("decreased",percent(change, accuracy=0.1), "decrease"))` and deaths `r ifelse(d_change > 0, paste("increased", percent(d_change, accuracy=0.1)), paste("decreased",percent(d_change, accuracy=0.1), "decrease"))`.
+  - By region, cases increased in the following regions: `r increase_regions`. Cases decreased in the following: `r decrease_regions`.
+  - Countries with highest percent increase in cases were `r increase_countries`.
+
+
+- Vaccination
+```{r Vaccination Bullets (Epi Week), include = FALSE, cache=FALSE}
+
+df_vax <- df_vax %>%
+  mutate(people_vaccinated_per_hundred_cat = cut(people_vaccinated_per_hundred, breaks = c(0, 1, 3, 10, 30, Inf)),
+         people_fully_vaccinated_per_hundred_cat = cut(people_fully_vaccinated_per_hundred, breaks = c(0, 1, 3, 10, 30, Inf))) %>%
+  full_join(country_coords, by = c("iso_code" = "iso3code")) %>% 
+  group_by(location) %>% 
+  filter(!is.na(people_vaccinated_per_hundred)) %>%
+  arrange(date) %>%
+  top_n(1, date) %>%
+  distinct(iso_code, .keep_all = TRUE)
+
+vax_date      <- max(df_vax$date)
+vax_countries <- length(unique(df_vax$location))
+vax_total     <- sum(filter(df_vax, date == max(date))$total_vaccinations, na.rm = T)
+```
+  - Vaccination is reported in at least `r vax_countries` countries or territories. As of `r format(vax_date, "%B %d")`, a total of `r comma(vax_total)` doses have been administered.
+
+
+- Global Epidemiology
+```{r Epi Curve (Epi Week), echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE, fig.height = 7, fig.width = 11}
+#QC: WHO Dashboard
+plot_epicurve(filter(df, source == "WHO" & region != "Other" & date <= analysis_date))
+```
+
+
+- Variants
+```{r VOC Bullet, include = FALSE, cache=FALSE}
+# QC Tracker Pivots
+variants <- variants %>%
+  full_join(country_coords, by = c("ISO" = "iso3code")) %>%
+  filter(!is.na('WHO assiged name')) %>%
+  st_as_sf()
+
+max_variant_date <- analysis_date
+n_alpha <- filter(variants, `WHO.assigned.name` == "Alpha") %>% nrow()
+n_beta  <- filter(variants, `WHO.assigned.name` == "Beta")  %>% nrow()
+n_gamma <- filter(variants, `WHO.assigned.name` == "Gamma") %>% nrow()
+n_delta <- filter(variants, `WHO.assigned.name` == "Delta") %>% nrow()
+```
+  - Based on data from `r format(max_variant_date, "%B %d")`, Delta (B.1.617.2) has been identified in `r n_delta` countries and is present in all regions.
+
+## Countries we are watching (table with detailed data follows the country summaries)
+```{r Epi Curve Individual, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE, fig.height = 3, fig.width = 18}
+c_list <- c("Japan")
+for (c in c_list){
+
+  grid.arrange(
+    plot_epicurve_ind(filter(df2, country == c) %>% rename(cases  = week_case_incidence),
+                      type = "cases",  incidence = T),
+    plot_epicurve_ind(filter(df2, country == c) %>% rename(deaths = week_death_incidence),
+                      type = "deaths", incidence = T),
+    ncol = 2
+  )
+
+}
+
+```
+
+```{r country table, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 3, fig.width = 15}
+
+table_countriesofconcern(df2, df_vax, df_man, c_list)
+```
+
+## MORE DETAILED DATA ON VACCINATION AND VARIANTS: 
+
+## Vaccination
+
+Vaccination is reported in at least `r vax_countries` countries or territories. As of `r format(vax_date, "%B %d")`, a total of `r comma(vax_total)` doses have been administered.
+
+```{r vaccination map, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE, fig.height = 7, fig.width = 11}
+  cat_vals = c("#d4ece8","#a2d9d2", "#1f9fa9", "#005e70", "#27343a")
+  cat_labs = c("<1", "1- <3", "3- <10", "10- <30", "30+")
+
+  map_template(rename(df_vax, result = people_vaccinated_per_hundred_cat), cat_labs, cat_vals) +
+    labs(title    = paste0("People Vaccinated per 100 People, ", format(max(df$date), "%B %d, %Y")),
+         subtitle = "Number of people out of 100 who received at least one vaccine dose; does not represent percent of \npopulation fully vaccinated",
+         caption  = "Note:
+       -Countries in white do not have data reported for total people vaccinated
+       -Vaccine data are incomplete and data may be out of date")+ 
+  guides(fill = guide_legend(title="People Vaccinated per 100"))
+
+
+    cat_vals = c("#CCECE6","#99D8C9", "#66C2A4", "#2CA25F", "#006D2C")
+    cat_labs = c("<1", "1- <3", "3- <10", "10- <30", "30+")
+
+  map_template(rename(df_vax, result = people_fully_vaccinated_per_hundred_cat), cat_labs, cat_vals) +
+      labs(title    = paste0("People Fully Vaccinated per 100 People, ", format(max(df$date), "%B %d, %Y")),
+           subtitle = "Represents percent of population fully vaccinated",
+           caption  = "Note:
+       -Countries in white do not have data reported for fully vaccinated
+       -Vaccine data are incomplete and data may be out of date") +
+  guides(fill = guide_legend(title="People Fully Vaccinated per 100"))
+```
+
+## Variants of Concern
+
+- Alpha(B.1.1.7) has been identified in `r n_alpha` countries.
+- Beta(B.1.351) has been identified in `r n_beta` countries.
+- Gamma(P.1) has been identified in `r n_gamma` countries.
+- Delta(B.1.617.2) has been identified in `r n_delta` countries.
+
+```{r Variant Maps, echo=FALSE, message=FALSE, warning=FALSE, cache=FALSE, fig.height = 7, fig.width = 11}
+variants$Verification <- ordered(variants$Verification, 
+                                 levels = c("Verified", "Not verified"),
+                                 labels = c("Verified by WHO", "Reported from\nother sources"))
+grid.arrange(
+  
+  # Variant Alpha (B.1.1.7) Map
+  map_template(filter(variants, `WHO.assigned.name` == 'Alpha') %>% 
+                 mutate(result = Verification),
+               #country_coords, 
+               c("Verified by WHO", "Reported from\nother sources"), 
+               c("#2171b5","#94939e", "grey95")) +
+    labs(title = "Countries reporting Alpha (B.1.1.7) variant", fill = ""),
+  
+  # Variant Beta (B.1.351) Map
+  map_template(filter(variants, `WHO.assigned.name` == 'Beta') %>% 
+                 mutate(result = Verification), 
+               #country_coords, 
+               c("Verified by WHO", "Reported from\nother sources"),
+               c( "#238b45","#94939e", "grey95")) +
+    labs(title = "Countries reporting Beta (B.1.351) variant", fill = ""),
+  
+  # Variant Gamma (P.1) Map
+  map_template(filter(variants, `WHO.assigned.name` == 'Gamma') %>% 
+                 mutate(result = Verification), 
+               #country_coords, 
+               c("Verified by WHO", "Reported from\nother sources"), 
+               c("#6a51a3","#94939e", "grey95")) +
+    labs(title = "Countries reporting Gamma (P.1) variant", fill = ""), 
+  
+  # Variant Delta (B.1.617.2) Map
+  map_template(filter(variants, `WHO.assigned.name` == 'Delta') %>% 
+                 mutate(result = Verification), 
+               # country_coords, 
+               c("Verified by WHO", "Reported from\nother sources"),
+               c( "#e30b5d","#94939e", "grey95")) +
+    labs(title = "Countries reporting Delta (B.1.617.2) variant", fill = ""),
+  
+  ncol = 2
+)
+```
+
+
+
